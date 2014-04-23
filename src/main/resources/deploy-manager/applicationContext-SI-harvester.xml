@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:int="http://www.springframework.org/schema/integration"
+    xmlns:int-jms="http://www.springframework.org/schema/integration/jms"
+    xmlns:int-jdbc="http://www.springframework.org/schema/integration/jdbc" 
+    xmlns:jdbc="http://www.springframework.org/schema/jdbc" 
+    xmlns:int-jmx="http://www.springframework.org/schema/integration/jmx" 
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/integration
+            http://www.springframework.org/schema/integration/spring-integration.xsd
+            http://www.springframework.org/schema/integration/jms
+            http://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd 
+            http://www.springframework.org/schema/integration/jdbc 
+            http://www.springframework.org/schema/integration/jdbc/spring-integration-jdbc.xsd 
+            http://www.springframework.org/schema/integration/jmx 
+            http://www.springframework.org/schema/integration/jmx/spring-integration-jmx.xsd">
+<!-- 
+Configuration file for harvesting from a DB table using  JDBC.
+ -->
+ 
+ 	<int-jmx:mbean-export id="mbeanExporterRedboxJdbcHarvester" default-domain="au.com.redboxresearchdata.harvester.client.sample.jdbc" server="mbeanServer"/>
+	
+	<int-jdbc:inbound-channel-adapter query="${harvest.jdbc.Dataset.query}" id="inboundJdbcAdapter"
+    channel="datasetIn" data-source="dataSource" select-sql-parameter-source="datasetConfigSqlParamSource"     
+     />
+    
+    <poller default="true" receive-timeout="${harvest.pollTimeout}" fixed-delay="${harvest.pollRate}"
+		xmlns="http://www.springframework.org/schema/integration">
+		<transactional isolation="SERIALIZABLE" />
+	</poller>
+	
+	<int:header-enricher input-channel="datasetIn" output-channel="jdbcIn">
+	    <int:header name="type" value="Dataset"/>	     
+	</int:header-enricher>
+		
+	<int:transformer id="jdbcToJson" input-channel="jdbcIn"
+		output-channel="jdbcHarvestChannel" ref="transformationHandler" method="handleJdbc" />
+		
+	<int-jms:outbound-channel-adapter id="jmsOut" destination="requestQueue" channel="jdbcHarvestChannel"/> 
+	
+	<int:channel id="jdbcHarvestChannel">
+		<int:interceptors>
+			<int:wire-tap channel="jdbcloggingChannel" />
+		</int:interceptors>
+	</int:channel> 
+
+	<int:logging-channel-adapter id="jdbcloggingChannel"
+		expression="'Processing JDBC record of type:' + headers.type" />
+
+	<bean id="transformationHandler"
+		class="au.com.redboxresearchdata.harvester.json.transformer.JsonTransformationHandler" >
+		<property name="config" value="#{placeholderProperties.config}" />
+	</bean>
+		
+		
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="${harvest.jdbc.driver}" />
+		<property name="url" value="${harvest.jdbc.url}" />
+		<property name="username" value="${harvest.jdbc.user}" />
+		<property name="password" value="${harvest.jdbc.pw}" />
+	</bean>
+	
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<bean id="placeholderProperties" class="au.com.redboxresearchdata.util.config.ConfigSlurperPlaceholderConfigurer">
+		<property name="environment" value="#{grailsApplication.getConfig().get('environment')}"/>
+		<property name="defaultEnvironment" value="production" />
+		<property name="config" value="#{grailsApplication.getConfig().get('clientConfigObj')}" />
+	</bean>			
+	
+	<bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="${activemq.url}" />
+    </bean>
+    <bean id="requestQueue" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg value="jsonHarvester"/>
+	</bean>
+	<bean id="datasetConfigSqlParamSource" class="au.com.redboxresearchdata.jdbc.ConfigSqlParameterSource" >
+		<property name="config" value="#{placeholderProperties.config}" />
+		<property name="type" value="Dataset" />
+	</bean> 	
+</beans>
