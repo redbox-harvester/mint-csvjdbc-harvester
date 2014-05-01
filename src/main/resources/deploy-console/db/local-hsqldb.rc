@@ -1,5 +1,0 @@
-urlid local
-url jdbc:hsqldb:file:db/data/local;shutdown=true
-username SA
-password
-transiso TRANSACTION_READ_COMMITTED

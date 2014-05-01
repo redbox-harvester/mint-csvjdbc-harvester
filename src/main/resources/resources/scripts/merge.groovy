@@ -22,37 +22,64 @@ import groovy.json.*
 import org.apache.log4j.Logger
 import org.apache.commons.io.FilenameUtils
 
+
 if (!configPath) {
 	configPath = "${FilenameUtils.removeExtension(scriptPath)}-config.groovy"
 }
-log.debug("Using ${configPath}")
+
+if (log.isDebugEnabled()) {
+    log.debug("Using ${configPath}")
+}
+
 def configFile = new File(configPath)
 if (configFile.exists()) {
-	log.debug("Attempting to load script config '${configPath}' using environment:${config.environment}")
-	def scriptConfig= new ConfigSlurper(config.environment).parse(configFile.toURI().toURL())
-	scriptConfig.harvest.scripts.scriptBase = config.harvest.scripts.scriptBase
-	config = scriptConfig		
+	log.debug("Attempting to load script config '${configPath}' using environment: " + System.getProperty("environment"))
+    def mergeConfig= new ConfigSlurper(config.environment).parse(configFile.toURI().toURL())
+	mergeConfig.scriptBase = config.harvest.scripts.scriptBase
+    mergeConfig.harvest.rulesName = config.harvest.rulesName
+    //overwrite existing config with mergeConfig
+    config = mergeConfig
 }
 
 // reading the Template ...
-log.debug(config)
-log.debug(type)
-def templateJsonFile = config[type].templateJsonFile
-if (!templateJsonFile) {
+if (log.isDebugEnabled()) {
+    log.debug("Merge config file...")
+    log.debug(JsonOutput.toJson(config.flatten()))
+
+    log.debug("Data record...")
+    log.debug(JsonOutput.toJson(data))
+
+    log.debug("type: '${type}'.")
+}
+
+String templateJsonFileName = (config.scriptBase ?: "") << (config.template.folder ?: "") << (config.template.prefix ?: "") <<
+        (type ?: config.harvestType).toLowerCase() << (config.template.suffix ?: "") << (config.template.extension ?: "")
+
+if (!(templateJsonFileName?.trim())) {
 	data = null
 	message = "This script requires a 'templateJsonFile' entry"
 	log.error(message)
 	return
 }
-templateJsonFile = (config.harvest.scripts.scriptBase ? config.harvest.scripts.scriptBase : "") + config[type].templateJsonFile
+
+File templateJsonFile = new File(templateJsonFileName)
+
+if (templateJsonFile.exists()) {
+    log.debug("Found templateJsonFile: '${templateJsonFileName}'.")
+} else {
+    data = null
+    log.error("Failed to find templateJsonFile: '${templateJsonFileName}'.")
+    return
+}
 
 def jsonSlurper = new JsonSlurper()
-def templateJson = jsonSlurper.parse(new FileReader(new File(templateJsonFile)))
-
+def templateJson = jsonSlurper.parse(new FileReader(templateJsonFile))
+//
 def mergeUtil = new MergeUtil(config:config, data:data, type:type, log:log)
 mergeUtil.doMerge((Map)templateJson)
 data = mergeUtil.data
 message = mergeUtil.message
+
 
 // --------------------------------------------------------------------------------------
 /**
@@ -69,8 +96,21 @@ class MergeUtil {
 	Logger log
 	
 	def doMerge(Map templateJson) {
-		mergeField(data, templateJson)		
+		mergeField(data, templateJson)
+        //for type, only add  if not already in data or template
+        mergeRulesConfig()
 	}
+
+    def mergeRulesConfig() {
+        String rulesName = config.harvest.rulesName
+
+        if (rulesName?.trim() && type?.trim()) {
+            log.info("Merging.. rulesConfig map: '${rulesName}: ${type}'")
+            mergeField(data, [(rulesName): (type)] )
+        } else {
+            log.info("No rulesConfig map: '${rulesName}: ${type}' found to merge.")
+        }
+    }
 	
 	/**
 	 * This method just compares each key in the template map against the source map. If the key is not an empty string or not null, the source map's entry is not altered.

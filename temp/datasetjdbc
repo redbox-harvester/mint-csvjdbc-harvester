@@ -1,0 +1,101 @@
+{
+  "type": "MintJson",
+  "harvesterId": "redboxDatasetJdbcAdapterConsole",
+  "hostName": "TILS-HPC-069277",
+  "hostIp": "fe80:0:0:0:f6f9:51ff:fef1:3915%4,131.181.64.191,192.168.101.1,172.16.152.1",
+  "data": {
+    "data": [
+      {
+        "ID": 1,
+        "Name": "University of Examples - ReDBox, Metadata Registry",
+        "Type": "assemble",
+        "ANZSRC_FOR_1": "",
+        "ANZSRC_FOR_2": "",
+        "ANZSRC_FOR_3": "",
+        "Location": "123 Example Street, City, STATE",
+        "Coverage_Temporal_From": "2014-04-23T05:08:58+0000",
+        "Coverage_Temporal_To": "2014-04-23T05:08:58+0000",
+        "Coverage_Spatial_Type": "2014-04-23T05:08:58+0000",
+        "Coverage_Spatial_Value": "2014-04-23T05:08:58+0000",
+        "Existence_Start": "2014-04-23T05:08:58+0000",
+        "Existence_End": "2014-04-23T05:08:58+0000",
+        "Website": "http://service.example.edu.au/",
+        "Data_Quality_Information": "http://service.example.edu.au/dataquality",
+        "Reuse_Information": "http://service.example.edu.au/reuse",
+        "Access_Policy": "http://service.example.edu.au/access",
+        "URI": "",
+        "Description": "ReDBox is a metadata registry application for describing research data.",
+        "Group": 8,
+        "datasetId": 1,
+        "owner": "admin",
+        "last_updated": "2013-11-11T03:11:53+0000",
+        "varMap": {
+          "file.path": ""
+        },
+        "metadata.json": {
+          "Data_Quality_Information": "",
+          "Format": "",
+          "Reuse_Information": "",
+          "Type": "",
+          "Group": "",
+          "Coverage_Spatial_Value": "",
+          "Repository Name": "",
+          "Coverage_Temporal_To": "",
+          "Repository type": "",
+          "datasetId": "",
+          "ID": "",
+          "Storage id": "",
+          "Identifier": "",
+          "Last modified": "",
+          "URI": "",
+          "ANZSRC_FOR_2": "",
+          "ANZSRC_FOR_3": "",
+          "Description": "",
+          "Coverage_Temporal_From": "",
+          "Display type": "",
+          "Website": "",
+          "Subject": "",
+          "ANZSRC_FOR_1": "",
+          "Location": "",
+          "Security filter": "",
+          "Name": "",
+          "Harvest rules": "",
+          "Existence_End": "",
+          "Harvest config": "",
+          "owner": "",
+          "Oai set": "",
+          "Known ids": "",
+          "Access_Policy": "",
+          "Existence_Start": "",
+          "last_updated": "",
+          "Coverage_Spatial_Type": ""
+        },
+        "attachmentDestination": {
+          "tfpackage": [
+            "<oid>.tfpackage",
+            "metadata.json",
+            "$file.path"
+          ],
+          "workflow.metadata": [
+            "workflow.metadata"
+          ]
+        },
+        "attachmentList": [
+          "metadata.json",
+          "workflow.metadata"
+        ],
+        "customProperties": [],
+        "workflow.metadata": {
+          "id": "mint",
+          "formData": {
+            "title": "JSON Mint Harvester - Template Injected: Title",
+            "description": "JSON Mint Harvester - Template Injected: Description"
+          },
+          "pageTitle": "Metadata Record",
+          "label": "Metadata Review",
+          "step": "metadata-review"
+        }
+      }
+    ]
+  }
+}

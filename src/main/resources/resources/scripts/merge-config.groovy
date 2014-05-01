@@ -1,3 +1,6 @@
-Mint {
-	templateJsonFile = "template-data/dataset-template.json"
+template {
+    folder = "template-data/"
+    prefix = ""
+    suffix = "-template"
+    extension = ".json"
 }
