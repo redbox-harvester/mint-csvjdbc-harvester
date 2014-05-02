@@ -63,6 +63,7 @@ environments {
 		}
 		activemq {
 			url = "tcp://localhost:9201"
+            queueName = "jsonHarvester"
 		}
 	}
 	production {
