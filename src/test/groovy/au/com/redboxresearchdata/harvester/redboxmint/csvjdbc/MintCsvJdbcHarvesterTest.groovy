@@ -48,7 +48,7 @@ class MintCsvJdbcHarvesterTest extends GroovyTestCase {
 	def receiverAppContext
 	def siThread
 	boolean validStat
-	String sampleUrl = "https://raw.githubusercontent.com/redbox-mint/mint-build-distro/master/src/main/config/data"
+	String sampleUrl = "https://raw.githubusercontent.com/redbox-mint/mint-build-distro/master/src/main/config/home/data"
 	
 	void setUpChannel() {
 		File inputDir = new File ("target/input/")
