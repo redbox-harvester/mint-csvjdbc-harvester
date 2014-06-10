@@ -55,7 +55,7 @@ class MintCsvJdbcHarvesterTest extends GroovyTestCase {
 		inputDir.deleteDir()
 		
 		config = new ConfigSlurper("test").parse(new File("src/main/resources/deploy-manager/harvester-config.groovy").toURI().toURL())
-		grailsConfig = ["environment":"test", "clientConfigObj":config, "managerBase":'', "harvesterId":'']
+		grailsConfig = ["environment":"test", "clientConfigObj":config, "managerBase":'', "harvesterId":'TestHarvester']
 		grailsApplication.config = grailsConfig
 		
 		MBeanServerFactoryBean mbeanServer = new MBeanServerFactoryBean()
