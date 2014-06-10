@@ -47,6 +47,8 @@ class MintCsvJdbcHarvesterTest extends GroovyTestCase {
 	MessageChannel csvjdbcHarvestMainChannel
 	def receiverAppContext
 	def siThread
+	boolean validStat
+	String sampleUrl = "https://raw.githubusercontent.com/redbox-mint/mint-build-distro/master/src/main/config/data"
 	
 	void setUpChannel() {
 		File inputDir = new File ("target/input/")
@@ -108,7 +110,10 @@ class MintCsvJdbcHarvesterTest extends GroovyTestCase {
 		String rulesConfig = json.data.data[0].rulesConfig
 		assertTrue(rulesConfig != null)
 		logger.info "RulesConfig is: ${rulesConfig}"
-		this."validate${json.data.data[0].rulesConfig}"(json)
+		validStat = this."validate${json.data.data[0].rulesConfig}"(json)
+		synchronized(siThread) {
+			siThread.notifyAll()
+		}
 		logger.info "------ Message Validated --------"
 		return msg
 	}
@@ -118,21 +123,174 @@ class MintCsvJdbcHarvesterTest extends GroovyTestCase {
 		setUpChannel()
 		logger.info("Starting Tests....")
 		doServices()
+		assertTrue(validStat)
+		doParties_People()
+		assertTrue(validStat)
+		doParties_Groups()
+		assertTrue(validStat)
+		doFunding_Bodies()
+		assertTrue(validStat)
+		doLanguages()
+		assertTrue(validStat)
+		doActivities_NHMRC_2010()
+		assertTrue(validStat)
 		tearDownChannel()
 	}
 	// ---------------------------------------------------------------------------------------------------
 	void doServices() { 
 		logger.info "Testing Services.........."
-		String serviceUrl = "https://raw.githubusercontent.com/redbox-mint/mint/master/config/src/main/config/home/data/Services.csv"
+		String serviceUrl = "${sampleUrl}/Services.csv"
 		String csvText = serviceUrl.toURL().text
 		new File(config.harvest.directory, "Services.csv").withWriter {
 			it.write(csvText)
 		}				
-		sleep(10000) // enough time to handle the services message.
+		synchronized(siThread) {
+			siThread.wait()
+		}
 	}
 	// ---------------------------------------------------------------------------------------------------
-	void validateServices(json) {
+	boolean validateServices(json) {
 		logger.info "------- Validating Service ---------"
-		
+		try {
+			json.data.data.each {d->
+				assertEquality("Services", d.rulesConfig)
+			}
+		} catch (e) {
+			logger.error(e)
+			return false
+		}
+		return true
+	}
+	// ---------------------------------------------------------------------------------------------------
+	void doParties_People() {
+		logger.info "Testing People.........."
+		String peopleSampleUrl = "${sampleUrl}/Parties_People.csv"
+		String csvText = peopleSampleUrl.toURL().text
+		new File(config.harvest.directory, "Parties_People.csv").withWriter {
+			it.write(csvText)
+		}
+		synchronized(siThread) {
+			siThread.wait()
+		}
+	}
+	// ---------------------------------------------------------------------------------------------------
+	boolean validateParties_People(json) {
+		logger.info "------- Validating People ---------"
+		try {
+			json.data.data.each {d->
+				assertEquality("Parties_People", d.rulesConfig)
+			}
+		} catch (e) {
+			logger.error("Assertion test failed on People---------")
+			logger.error(e)
+			return false
+		}
+		return true
+	}
+	// ---------------------------------------------------------------------------------------------------
+	void doParties_Groups() {
+		logger.info "Testing Groups.........."
+		String groupsSampleUrl = "${sampleUrl}/Parties_Groups.csv"
+		String csvText = groupsSampleUrl.toURL().text
+		new File(config.harvest.directory, "Parties_Groups.csv").withWriter {
+			it.write(csvText)
+		}
+		synchronized(siThread) {
+			siThread.wait()
+		}
+	}
+	// ---------------------------------------------------------------------------------------------------
+	boolean validateParties_Groups(json) {
+		logger.info "------- Validating Groups ---------"
+		try {
+			json.data.data.each {d->
+				assertEquality("Parties_Groups", d.rulesConfig)
+			}
+		} catch (e) {
+			logger.error(e)
+			return false
+		}
+		return true
+	}
+	// ---------------------------------------------------------------------------------------------------
+	void doFunding_Bodies() {
+		logger.info "Testing Funding Bodies.........."
+		String fundingBodiesSampleUrl = "${sampleUrl}/Funding_Bodies.csv"
+		String csvText = fundingBodiesSampleUrl.toURL().text
+		new File(config.harvest.directory, "Funding_Bodies.csv").withWriter {
+			it.write(csvText)
+		}
+		synchronized(siThread) {
+			siThread.wait()
+		}
+	}
+	// ---------------------------------------------------------------------------------------------------
+	boolean validateFunding_Bodies(json) {
+		logger.info "------- Validating Funding Bodies ---------"
+		try {
+			json.data.data.each {d->
+				assertEquality("Funding_Bodies", d.rulesConfig)
+			}
+		} catch (e) {
+			logger.error(e)
+			return false
+		}
+		return true
+	}
+	// ---------------------------------------------------------------------------------------------------
+	void doLanguages() {
+		logger.info "Testing Languages.........."
+		String languagesUrl = "${sampleUrl}/Languages.csv"
+		String csvText = languagesUrl.toURL().text
+		new File(config.harvest.directory, "Languages.csv").withWriter {
+			it.write(csvText)
+		}
+		synchronized(siThread) {
+			siThread.wait()
+		}
+	}
+	// ---------------------------------------------------------------------------------------------------
+	boolean validateLanguages(json) {
+		logger.info "------- Validating Languages ---------"
+		try {
+			json.data.data.each {d->
+				assertEquality("Languages", d.rulesConfig)
+			}
+		} catch (e) {
+			logger.error(e)
+			return false
+		}
+		return true
+	}
+	// ---------------------------------------------------------------------------------------------------
+	void doActivities_NHMRC_2010() {
+		logger.info "Testing Activities_NHMRC_2010.........."
+		String languagesUrl = "${sampleUrl}/Activities_NHMRC_2010.csv"
+		String csvText = languagesUrl.toURL().text
+		new File(config.harvest.directory, "Activities_NHMRC_2010.csv").withWriter {
+			it.write(csvText)
+		}
+		synchronized(siThread) {
+			siThread.wait()
+		}
+	}
+	// ---------------------------------------------------------------------------------------------------
+	boolean validateActivities_NHMRC_2010(json) {
+		logger.info "------- Validating Activities_NHMRC_2010 ---------"
+		try {
+			json.data.data.each {d->
+				assertEquality("Activities_NHMRC_2010", d.rulesConfig)
+			}
+		} catch (e) {
+			logger.error(e)
+			return false
+		}
+		return true
+	}
+	// ---------------------------------------------------------------------------------------------------
+	private void assertEquality(expected, actual) {
+		if (expected != actual) {
+			throw new Exception("Expected: ${expected} but got: ${actual}")
+		}
 	}
 }
