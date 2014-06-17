@@ -47,7 +47,7 @@ environments {
 			directory = "target/input"
             type = "Mint"
             rulesName = "rulesConfig"
-			queueCapacity = 10
+			queueCapacity = 1
 			output {
 				directory = "target/output/"
 				dateFormat = "yyyy-MM-dd_HHmmssSSS"
@@ -93,7 +93,7 @@ environments {
 			directory = client.base+"input/"
 			type = "Mint"
 			rulesName = "rulesConfig"
-			queueCapacity = 10
+			queueCapacity = 1
 			output {
 				directory = client.base+"output/"
 				dateFormat = "yyyy-MM-dd_HHmmssSSS"
@@ -139,7 +139,7 @@ environments {
 			directory = client.base+"input/"
 			type = "Mint"
 			rulesName = "rulesConfig"
-			queueCapacity = 10
+			queueCapacity = 1
 			output {
 				directory = client.base+"output/"
 				dateFormat = "yyyy-MM-dd_HHmmssSSS"

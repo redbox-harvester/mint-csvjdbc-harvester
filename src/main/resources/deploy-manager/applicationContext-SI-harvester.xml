@@ -24,8 +24,9 @@
         <property name="config" value="#{grailsApplication.config.get('clientConfigObj')}" />
     </bean>
 	<int:channel id="channel_filesIn" />
-	<int-file:inbound-channel-adapter channel="channel_filesIn" id="channel_filesInAdapter" directory="${harvest.directory}" filename-pattern="*.csv">
+	<int-file:inbound-channel-adapter channel="channel_filesIn" id="channel_filesInAdapter" directory="${harvest.directory}" filter="compositeFilter">
 		<int:poller id="poller" max-messages-per-poll="${harvest.queueCapacity}" fixed-delay="${harvest.pollRate}"/>
+		<int-file:nio-locker/>
 	</int-file:inbound-channel-adapter>
 
     <int:chain input-channel="channel_filesIn" output-channel="channel_tablesIn">
@@ -87,6 +88,16 @@
 	<bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
 		<property name="brokerURL" value="${activemq.url}" />
 	</bean>
-
-
+	<bean id="acceptAllFilter" class="org.springframework.integration.file.filters.AcceptAllFileListFilter"/>
+	<bean id="simplePatternFilter" class="org.springframework.integration.file.filters.SimplePatternFileListFilter">
+		<constructor-arg value="*.csv"/>	
+	</bean>
+	<bean id="compositeFilter" class="org.springframework.integration.file.filters.CompositeFileListFilter">
+		<constructor-arg>
+			<list>
+				<ref bean="acceptAllFilter" />
+				<ref bean="simplePatternFilter" />
+			</list>
+		</constructor-arg>	
+	</bean>
 </beans>
