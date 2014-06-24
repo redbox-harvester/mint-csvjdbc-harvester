@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:int="http://www.springframework.org/schema/integration"
+    xmlns:int-jms="http://www.springframework.org/schema/integration/jms"
+    xmlns:int-jdbc="http://www.springframework.org/schema/integration/jdbc" 
+    xmlns:jdbc="http://www.springframework.org/schema/jdbc" 
+    xmlns:int-jmx="http://www.springframework.org/schema/integration/jmx" 
+    xmlns:amq="http://activemq.apache.org/schema/core"  
+    xmlns:int-file="http://www.springframework.org/schema/integration/file"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/integration
+            http://www.springframework.org/schema/integration/spring-integration.xsd
+            http://www.springframework.org/schema/integration/jms
+            http://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd 
+            http://www.springframework.org/schema/integration/jdbc 
+            http://www.springframework.org/schema/integration/jdbc/spring-integration-jdbc.xsd 
+            http://www.springframework.org/schema/integration/jmx 
+            http://www.springframework.org/schema/integration/jmx/spring-integration-jmx.xsd 
+            http://activemq.apache.org/schema/core  
+            http://activemq.apache.org/schema/core/activemq-core.xsd 
+            http://www.springframework.org/schema/integration/file
+            http://www.springframework.org/schema/integration/file/spring-integration-file.xsd">
+            
+    <int-jmx:mbean-export id="mbeanExporterMintCsvJdbcTest" default-domain="au.com.redboxresearchdata.harvester.client.mint.csvjdbc.test" server="mbeanServer" />
+    
+    <int:channel id="mainChannel" />
+    <int:channel id="filesOutChannel" />
+    <int-jms:message-driven-channel-adapter id="jmsIn" destination="inputQueue" channel="mainChannel"/>        
+	<int:service-activator input-channel="mainChannel" ref="testInstance" method="handleMessage" output-channel="filesOutChannel"/>
+	<int-file:outbound-channel-adapter channel="filesOutChannel" directory="target/output/JmsOut/"/>
+	
+	<bean id="connectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
+		<property name="targetConnectionFactory">
+			<bean class="org.apache.activemq.ActiveMQConnectionFactory">
+				<property name="brokerURL" value="tcp://localhost:9211"/>		
+			</bean>
+		</property>
+		<property name="sessionCacheSize" value="10"/>
+		<property name="cacheProducers" value="false"/>
+	</bean>
+    
+    <bean id="inputQueue" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg value="jsonHarvester"/>
+	</bean>	
+	
+   <amq:broker id="activeMQBroker" dataDirectory="target/activeMqData">
+	    <amq:transportConnectors>
+	        <amq:transportConnector uri="tcp://localhost:9211" />
+	    </amq:transportConnectors>
+	</amq:broker>
+</beans>
