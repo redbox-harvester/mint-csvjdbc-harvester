@@ -1,0 +1,41 @@
+```
+title: Installation
+layout: page
+pageOrder: 1
+```
+# console-version:
+## Preparation
+* Use maven profile 'console' to build project with all dependent jars within zipped archive.
+* Navigate to target directory and unzip 'mint-csvjdbc-harvester...console.zip'
+* In the directory that you have unpacked the zipped installation, create:
+ * input directory (this is where you need to put the csv files you wish mint to ingest)
+ * output directory (this will allow the harvester to move the ingested csv files to a timestamped file in output directory. Without this, the files will remain in 'input')
+* Update harvester-config-console.groovy config to reflect mint AMQ url and queueName (_activemq.url_ and _activemq.queueName_)
+* Make 'harvest.sh' executable
+```
+chmod +x harvest.sh
+```
+* Start up the mint server
+
+
+## Running
+```
+./harvest.sh
+```
+
+## Understanding config for csvjdbc.
+### In harvester:
+In the mint csvjdbc harvester, there are 2 types:
+* The harvest type, which is set in 'harvester-config-console.groovy', and should always be 'Mint'. This is set once in the data ingest created and is used for the mint server to pick off 'MintJsonHarvester" as the Harvester to use to harvest any data that comes in labelled as this type.
+* The Mint type (or if easier to remember, the csvjdbc type). This is created by the csvjdbc harvester client from the name of the csv file. So, Services.csv will create the 'Services' type for all of the contained records, while 'Parties_People.csv' will create the 'Parties_People' type for all of its contained records. This type is set on each contained csv record (atm, however, the mint server will only look at the first record of each csv type, to find this). This type must correspond with the name of the Mint Server's rulesConfig json file. So Services.csv records will be harvested on the mint server using Services.json (which, in turn, uses Services.py for processing). 
+
+On the mint server, it uses 'harvester/MintJson.json" to determine certain harvestConfig key values. To replace/update these keys (determined in 'MintJsonHarvester.java'), these keys and the relevant values must be created in a template file, under "resources/scripts/template-data". So to update the value for recordIDPrefix for 'Services' type, create 'resources/scripts/template-data/services-template.json'.
+
+### In mint:
+In mint, the harvest config is built based on values coming from ingested harvest data, which are added to or replace existing config in the mint servers' harvest config under 'harvest/MintJson.json'. Because a running mint server keeps the harvest config in memory, various csv types that may be ingested have their own rules initialised as the data is received, rather than on Mint server start-up. 
+
+The keys for these values include:
+* recordIDPrefix: this is added to existing mint server recordIDPrefix, for which only the smallest path prefix is initially read. e.g., If a previous mint ingestion updated MintJson's harvester config's recordIDPrefix to "redbox-mint.googlecode.com/services", only the smallest path prefix, "redbox-mint.googlecode.com" is used to append the new types' config, say "parties/people". So the recordIDPrefix becomes "redbox-mint.googlecode.com/parties/people".
+* mainPayloadId: this is set in mint server config to create this attachment. Other attachments can be created in mint-harvester client by creating a template for a particular harvester and adding it under the client's template-data folder.
+* rulesConfig: each record within a mint csv harvest 'type' (e.g., services, people) has the rulesConfig to use. This is created from the name of the csv file, which is used as a table by the csvjdbc harvester. Thus, csv records in Services.csv, will update MintJson's harvester config, "rulesConfig" value of "${fascinator.home}/harvest" to "${fascinator.home}/harvest/Services.json" (the json extension is created by the mint server).
+* idField: The Mint Server has a default idfield of "ID". However setting this under "resources/scripts/template-data" will replace this idField for the current harvester type.

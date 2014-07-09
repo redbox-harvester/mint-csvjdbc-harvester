@@ -2,3 +2,6 @@
 .settings
 sql
 target
+documentation-site/out/
+documentation-site/node_modules/
+.classpath

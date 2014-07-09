@@ -1,0 +1,10 @@
+---
+layout: 'default'
+title: 'CSV-Mint-Home'
+---
+<div class="jumbotron">
+	<h2>CSV - Mint Harvester Documentation</h2>
+	<p> 
+		This documentation describes the CSV to Mint Harvester Client, an implementation of <a href="<%= @client.url %>" class="rewritable-url">Harvester Client</a> that sends CSV data into Mint. 
+	</p>
+</div>
