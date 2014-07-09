@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<!-- Meta -->
+	<meta charset="utf-8" />
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+	<!-- Use the .htaccess and remove these lines to avoid edge case issues.
+		 More info: h5bp.com/i/378 -->
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+	<!-- Our site title and description -->
+	<title>Installation | ReDBox Harvester Manager</title>
+	<meta name="description" content="Documentation for the CSV to Mint Harvester Client." />
+	<meta name="keywords" content="ReDBox, Research, Data, Data Integration, Spring Integration, Spring, Groovy" />
+	<meta name="author" content="Shilo Banihit" />
+
+	<!-- Output DocPad produced meta elements -->
+	<meta name="generator" content="DocPad v6.69.0" />
+
+	<!-- Mobile viewport optimized: h5bp.com/viewport -->
+	<meta name="viewport" content="width=device-width" />
+
+	<!-- Icons -->
+		<link rel="shortcut icon" href="images/icons/favicon.ico">
+		<link rel="apple-touch-icon-precomposed" sizes="144x144" href="images/icons/apple-touch-icon-144-precomposed.png">
+		<link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/icons/apple-touch-icon-114-precomposed.png">
+		<link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/icons/apple-touch-icon-72-precomposed.png">
+		<link rel="apple-touch-icon-precomposed" href="images/icons/apple-touch-icon-57-precomposed.png">
+
+	<!-- Shims: IE6-8 support of HTML5 elements -->
+	<!--[if lt IE 9]>
+		<script async src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+	<script type="text/javascript">
+		var projName = "/mint-csvjdbc-harvester";
+		var siteUrl = "http://harvester-csv-mint-snapshot.redboxresearchdata.com.au/";
+		var needsRewrite = function() {
+			var pathname = location.pathname;
+			return pathname.indexOf(projName) == 0 || pathname.indexOf("/release") == 0;
+		};
+		var getNewPath = function(projName, pathName) {
+			var newPath = projName;
+			if (pathName.indexOf(projName) == -1) {
+				newPath = "/release";
+				var releaseNumMatch = pathName.match(/\/release\/(.*)/);
+				if (releaseNumMatch != null && releaseNumMatch[1] != "") {
+					var pathCompArr = releaseNumMatch[1].split("/");
+					newPath = newPath + "/" + pathCompArr[0];
+				}
+			}
+			return newPath;
+		};
+		var parseUrl = function(url) {
+			var parser =  document.createElement('a');
+			parser.href = url;
+			return parser;
+		};
+		var writeElement = function(arr, prefix, suffix ) {
+			var rewrite = needsRewrite();
+			var newPath = "";
+			if (rewrite) {
+				newPath = getNewPath(projName, location.pathname);
+			} 
+			for (var i=0; i<arr.length; i++) {
+				var curPath = arr[i];
+				var parser = parseUrl(curPath); 
+				if (parser.host == location.host) {
+					curPath = newPath + curPath;
+				}
+				document.write(prefix+curPath+suffix);
+			}
+		};
+		
+		var writeStyles = function() {
+			var stylesArr = "/styles/twitter-bootstrap.css,/styles/style.css,/styles/stickyfooter.css".split(",");
+			var prefix = "<link  rel='stylesheet' href='";
+			var suffix = "' />";
+			writeElement(stylesArr, prefix, suffix);
+		};
+		
+		var writeScripts = function() {
+			var scriptsArr = "//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js,//cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js,/vendor/twitter-bootstrap/dist/js/bootstrap.min.js,/scripts/script.js".split(",");
+			var prefix = "<script defer='defer' src=\"";
+			var suffix = "\"></ script>";
+			writeElement(scriptsArr, prefix, suffix);
+		};
+		writeStyles();
+	</script>
+</head>
+<body>
+	<!-- Menu -->
+	<div class="navbar navbar-inverse navbar-fixed-top">
+		<div class="container">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<div class="navbar-brand"><a class="navbar-link rewritable-url" href="http://harvester-snapshot.redboxresearchdata.com.au/">ReDBox Harvester</a> - <a class="navbar-link rewritable-url" href="http://harvester-csv-mint-snapshot.redboxresearchdata.com.au/">CSV Mint Harvester </a></div>
+				
+			</div>
+			<div class="navbar-collapse collapse">
+				<ul class="nav navbar-nav">
+					
+						<li
+							typeof="sioc:Page"
+							about="/pages/installation"
+							class="active"
+						>
+							<a href="/pages/installation" property="dc:title" class="rewritable-url">
+								Installation
+							</a>
+						</li>
+					
+				</ul>
+			</div><!--/.navbar-collapse -->
+		</div>
+	</div>
+
+	<!-- Content -->
+	<div class="container">
+		<!-- Content -->
+		<section id="content" class="content">
+			<article id="page" class="page">
+	<h1>Installation</h1>
+	<div class="page-content"><h1 id="console-version-">console-version:</h1>
+<h2 id="preparation">Preparation</h2>
+<ul>
+<li>Use maven profile &#39;console&#39; to build project with all dependent jars within zipped archive.</li>
+<li>Navigate to target directory and unzip &#39;mint-csvjdbc-harvester...console.zip&#39;</li>
+<li>In the directory that you have unpacked the zipped installation, create:<ul>
+<li>input directory (this is where you need to put the csv files you wish mint to ingest)</li>
+<li>output directory (this will allow the harvester to move the ingested csv files to a timestamped file in output directory. Without this, the files will remain in &#39;input&#39;)</li>
+</ul>
+</li>
+<li>Update harvester-config-console.groovy config to reflect mint AMQ url and queueName (<em>activemq.url</em> and <em>activemq.queueName</em>)</li>
+<li>Make &#39;harvest.sh&#39; executable<pre><code>chmod +x harvest.sh
+</code></pre></li>
+<li>Start up the mint server</li>
+</ul>
+<h2 id="running">Running</h2>
+<pre><code>./harvest.sh
+</code></pre><h2 id="understanding-config-for-csvjdbc-">Understanding config for csvjdbc.</h2>
+<h3 id="in-harvester-">In harvester:</h3>
+<p>In the mint csvjdbc harvester, there are 2 types:</p>
+<ul>
+<li>The harvest type, which is set in &#39;harvester-config-console.groovy&#39;, and should always be &#39;Mint&#39;. This is set once in the data ingest created and is used for the mint server to pick off &#39;MintJsonHarvester&quot; as the Harvester to use to harvest any data that comes in labelled as this type.</li>
+<li>The Mint type (or if easier to remember, the csvjdbc type). This is created by the csvjdbc harvester client from the name of the csv file. So, Services.csv will create the &#39;Services&#39; type for all of the contained records, while &#39;Parties_People.csv&#39; will create the &#39;Parties_People&#39; type for all of its contained records. This type is set on each contained csv record (atm, however, the mint server will only look at the first record of each csv type, to find this). This type must correspond with the name of the Mint Server&#39;s rulesConfig json file. So Services.csv records will be harvested on the mint server using Services.json (which, in turn, uses Services.py for processing). </li>
+</ul>
+<p>On the mint server, it uses &#39;harvester/MintJson.json&quot; to determine certain harvestConfig key values. To replace/update these keys (determined in &#39;MintJsonHarvester.java&#39;), these keys and the relevant values must be created in a template file, under &quot;resources/scripts/template-data&quot;. So to update the value for recordIDPrefix for &#39;Services&#39; type, create &#39;resources/scripts/template-data/services-template.json&#39;.</p>
+<h3 id="in-mint-">In mint:</h3>
+<p>In mint, the harvest config is built based on values coming from ingested harvest data, which are added to or replace existing config in the mint servers&#39; harvest config under &#39;harvest/MintJson.json&#39;. Because a running mint server keeps the harvest config in memory, various csv types that may be ingested have their own rules initialised as the data is received, rather than on Mint server start-up. </p>
+<p>The keys for these values include:</p>
+<ul>
+<li>recordIDPrefix: this is added to existing mint server recordIDPrefix, for which only the smallest path prefix is initially read. e.g., If a previous mint ingestion updated MintJson&#39;s harvester config&#39;s recordIDPrefix to &quot;redbox-mint.googlecode.com/services&quot;, only the smallest path prefix, &quot;redbox-mint.googlecode.com&quot; is used to append the new types&#39; config, say &quot;parties/people&quot;. So the recordIDPrefix becomes &quot;redbox-mint.googlecode.com/parties/people&quot;.</li>
+<li>mainPayloadId: this is set in mint server config to create this attachment. Other attachments can be created in mint-harvester client by creating a template for a particular harvester and adding it under the client&#39;s template-data folder.</li>
+<li>rulesConfig: each record within a mint csv harvest &#39;type&#39; (e.g., services, people) has the rulesConfig to use. This is created from the name of the csv file, which is used as a table by the csvjdbc harvester. Thus, csv records in Services.csv, will update MintJson&#39;s harvester config, &quot;rulesConfig&quot; value of &quot;${fascinator.home}/harvest&quot; to &quot;${fascinator.home}/harvest/Services.json&quot; (the json extension is created by the mint server).</li>
+<li>idField: The Mint Server has a default idfield of &quot;ID&quot;. However setting this under &quot;resources/scripts/template-data&quot; will replace this idField for the current harvester type.</li>
+</ul>
+</div>
+</article>
+		</section>
+	</div><!-- /container -->
+	<!-- Footer -->
+	<div class="footer">
+		<div class="container">
+			<div class="col-md-6">
+				<div class="panel-body text-center">
+					<a href="http://harvester-snapshot.redboxresearchdata.com.au/" class="btn btn-default btn-med rewritable-url">Main Documentation</a>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div class="panel-body text-center">
+					<a href="http://harvester-csv-mint-snapshot.redboxresearchdata.com.au/" class="btn btn-default btn-med rewritable-url">CSV Mint Harvester Documentation</a>
+				</div>
+			</div>
+			<p class="pull-left">&copy; 2014 <a href="http://www.qcif.edu.au/" target="_blank">Queensland Cyber Infrastructure Foundation</a></p>
+			<p class="pull-right">This website was last updated at 2014-07-09T04:49:19.969Z</p>
+		</div>
+    </div>
+	<!-- Scripts -->
+	<script type="text/javascript">
+		onload = function () {
+			if (location.hostname.indexOf("github.io") >= 0) {
+				location.href = siteUrl + location.pathname.replace(projName+"/", "") + location.search + location.hash;
+			}
+			var pathname = location.pathname;
+			if (needsRewrite()) {
+				rewriteNavLinkUrl(projName, pathname);
+			}
+		};		
+		var rewriteNavLinkUrl = function(projName, pathName) {
+			var newPath = getNewPath(projName, pathName);			
+			for (var i = 0; i < document.links.length; i++) {
+				if (document.links[i].className.indexOf("rewritable-url") >= 0 ) {
+					var parser = parseUrl(document.links[i].href);
+					document.links[i].href =  parser.protocol + "//" + parser.host + newPath + parser.pathname + parser.search + parser.hash;
+				}
+			}			
+		};
+		writeScripts();
+	</script>
+</body>
+</html>
